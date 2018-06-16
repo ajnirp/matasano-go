@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	"strings"
 )
 
 func hex2Uint(b byte) byte {
@@ -84,12 +83,25 @@ func byte2HexChar(n byte) byte {
 	}
 }
 
+func padLeft(s string, pad byte, padAmount int) string {
+	if padAmount <= 0 {
+		return s
+	}
+
+	padBytes := make([]byte, padAmount)
+	for i, _ := range padBytes {
+		padBytes[i] = pad
+	}
+
+	return string(padBytes) + s
+}
+
 func XORBuffers(hex1, hex2 string) string {
 	if len(hex1) > len(hex2) {
 		hex1, hex2 = hex2, hex1
 	}
 
-	hex1 = strings.Repeat("0", len(hex2)-len(hex1)) + hex1
+	hex1 = padLeft(hex1, byte('0'), len(hex2)-len(hex1))
 	result := make([]byte, len(hex2))
 
 	for i := len(hex2) - 1; i >= 0; i -= 1 {
@@ -139,6 +151,20 @@ func SingleByteXORCipher(h string) {
 		s, _ := hex.DecodeString(xorOut)
 		fmt.Println(string(s))
 	}
+}
+
+func isASCII(r rune) bool {
+	return true
+}
+
+func scoreEnglishPlaintext(pt string) uint {
+	var score uint
+	for _, rune := range pt {
+		if isASCII(rune) {
+			score++
+		}
+	}
+	return score
 }
 
 func main() {
