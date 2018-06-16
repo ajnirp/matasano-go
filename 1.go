@@ -70,11 +70,11 @@ func Hex2B64(hex string) string {
 
 // Challenge 1.2
 /*
- * byte2HexDigit converts a byte in the range 0-15 to a hex digit
+ * byte2HexChar converts a byte in the range 0-15 to a hex digit
  */
-func byte2HexDigit(n byte) byte {
+func byte2HexChar(n byte) byte {
 	if n > 15 {
-		report := fmt.Sprintf("byte2HexDigit: uint out of range: %d", n)
+		report := fmt.Sprintf("byte2HexChar: uint out of range: %d", n)
 		panic(report)
 	}
 	if n < 10 {
@@ -95,7 +95,7 @@ func XORBuffers(hex1, hex2 string) string {
 	for i := len(hex2) - 1; i >= 0; i -= 1 {
 		u1 := hex2Uint(hex1[i])
 		u2 := hex2Uint(hex2[i])
-		result[i] = byte2HexDigit(u1 ^ u2)
+		result[i] = byte2HexChar(u1 ^ u2)
 	}
 
 	return string(result)
@@ -107,20 +107,21 @@ func XORBuffers(hex1, hex2 string) string {
  * both of which are stored as single bytes.
  */
 func byte2Hex(n byte) (result [2]byte) {
-	result[0] = byte2HexDigit(n & 0x0f)
-	result[1] = byte2HexDigit(n & 0xf0)
+	result[0] = byte2HexChar(n & 0x0f)
+	result[1] = byte2HexChar((n & 0xf0) >> 4)
 	return
 }
 
-func repeat(seq []byte, desiredLen int) string {
-	if desiredLen%len(seq) != 0 {
-		panic("repeat: length of sequence is not a factor of desired length")
+func repeat(pattern []byte, desiredLen int) string {
+	if desiredLen%len(pattern) != 0 {
+		panic(
+			"repeat: length of byte sequence is not a factor of desired length")
 	}
 
 	result := make([]byte, desiredLen)
-	for i := 0; i < desiredLen/len(seq); i++ {
-		for j, _ := range seq {
-			result[i*len(seq)+j] = seq[j]
+	for i := 0; i < desiredLen/len(pattern); i++ {
+		for j, _ := range pattern {
+			result[i*len(pattern)+len(pattern)-1-j] = pattern[j]
 		}
 	}
 
@@ -133,6 +134,7 @@ func SingleByteXORCipher(h string) {
 	for i := 0; i < 256; i++ {
 		test := byte2Hex(byte(i))
 		cipher := repeat(test[:], len(h))
+		// fmt.Println(h, cipher)
 		xorOut := XORBuffers(cipher, h)
 		s, _ := hex.DecodeString(xorOut)
 		fmt.Println(string(s))
